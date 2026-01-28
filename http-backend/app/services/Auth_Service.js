@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Users_models from '../db/user_model.js'
 import dotenv from 'dotenv'
-import e from 'express';
+import prisma from '../../../database.js';
 dotenv.config({ path: "../.env" });
 
 const JWT_SECRET = process.env.JWT_SECRET
@@ -12,9 +12,12 @@ export const SigninService = async(email ,password)=>{
     try{
 
       
-        const find_user = await Users_models.findOne({email});
+        const find_user = await prisma.User.findUnique({
+            where: {
+              email: email,
+            },
+          });
        
-        console.log("User found: ", find_user);
 
         if(!find_user){
              throw new Error("Credentails Wrong")
@@ -28,7 +31,7 @@ export const SigninService = async(email ,password)=>{
             throw new Error('Credentails Wrong')
         }
 
-        const details = {user_id : find_user._id , username : find_user.username , email : find_user.email}
+        const details = {user_id : find_user.userId , username : find_user.username , email : find_user.email}
 
        const token = jwt.sign(details , JWT_SECRET , {expiresIn : "7d"});
 
@@ -47,13 +50,21 @@ export const SignUpService = async(email , username , password)=>{
      
     try{
 
-        const find_user  = await Users_models.findOne({email  :email});
+        const find_user  = await prisma.User.findUnique({
+            where:{
+                 email:email
+            }
+        })
 
         if(find_user){
             throw new Error(`Email Already registred...`)
         }
 
-        const find_username = await Users_models.findOne({username : username});
+        const find_username = await prisma.User.findUnique({
+             where:{
+                username : username
+             }
+        });
 
         if(find_username){
              throw new Error(`Username already taken`)
@@ -61,13 +72,17 @@ export const SignUpService = async(email , username , password)=>{
 
         const hashpassword = await bcrypt.hash(password , 10);
 
-        const new_user =  new Users_models({
+        const new_user =  await prisma.User.create({
+
+            data :{
+
             email,
             username,
             password: hashpassword
-        })
 
-        await new_user.save();
+            }
+           
+        })
 
         return new_user;
 

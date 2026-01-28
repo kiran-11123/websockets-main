@@ -6,8 +6,6 @@ import connectDB from './app/db/connection.js';
 import Auth_Router from './app/routes/auth_routes.js';
 import Room_Router from './app/routes/room_routes.js';
 
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
 
 
 connectDB();
