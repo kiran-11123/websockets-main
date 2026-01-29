@@ -1,4 +1,3 @@
-import Room from "../db/room_model.js";
 import prisma from "../../../database.js";
 
 

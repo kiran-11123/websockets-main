@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import Users_models from '../db/user_model.js'
 import dotenv from 'dotenv'
 import prisma from '../../../database.js';
 dotenv.config({ path: "../.env" });
