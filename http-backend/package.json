@@ -15,7 +15,7 @@
    "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon --exec \"node -r ts-node/register index.js\""
   },
   "keywords": [],
   "author": "",
