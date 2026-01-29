@@ -2,13 +2,11 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv'
 import cors from 'cors'
-import connectDB from './app/db/connection.js';
 import Auth_Router from './app/routes/auth_routes.js';
 import Room_Router from './app/routes/room_routes.js';
 
 
 
-connectDB();
 dotenv.config({ path: "../.env" });
 const app = express();
 
