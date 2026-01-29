@@ -4,7 +4,7 @@ export const CreateRoomController = async(req,res)=>{
     try{
 
         const {name} = req.body;
-        const user_id = req.user_id;    
+        const user_id = req.user.user_id;    
         await CreateRoomService(name , user_id);
 
         return res.status(200).json({
@@ -30,7 +30,7 @@ export const DeleteRoomController = async(req,res)=>{
     try{            
 
         const {name} = req.body;
-        const user_id = req.user_id;    
+        const user_id = req.user.user_id;    
         await DeleteRoomService(name , user_id); 
 
         return res.status(200).json({
@@ -39,9 +39,15 @@ export const DeleteRoomController = async(req,res)=>{
 
     }
     catch(er){  
-        if(er.message === "Room not found or you don't have permission to delete this room"){  
+
+        if(er.message ==='Room not found'){
+              return res.status(400).json({
+                message : "Room not found"
+              })
+        }
+        if(er.message === "You dont have ownership to delete the room"){  
             return res.status(400).json({   
-                message : er.message
+                message : "You dont have ownership to delete the room"
             })  
 
         }
