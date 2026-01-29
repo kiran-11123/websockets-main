@@ -4,8 +4,9 @@ import prisma from "../../../database.js";
 export const CreateRoomService = async(room_name , user_id)=>{
      
      try{   
-
-        const find_room = await prisma.Room.findUnique({
+        
+        console.log(room_name , user_id);
+        const find_room = await prisma.room.findUnique({
              
             where:{
                 name : room_name,
@@ -18,14 +19,9 @@ export const CreateRoomService = async(room_name , user_id)=>{
 
         const room = await prisma.room.create({
     data: {
-      name: room_name,
-      users: {
-        connect: { userId: user_id }, // Connect the existing user
-      },
-    },
-    include: {
-      users: true, // Optional: return the users in the room
-    },
+      name: room_name
+     
+    }
   });
 
   return room;

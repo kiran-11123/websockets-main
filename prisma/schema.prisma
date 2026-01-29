@@ -12,6 +12,7 @@ model User {
   email     String       @unique
   password  String
   rooms     RoomMember[]
+  roomsCreated Room[] 
   messages  Message[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
@@ -20,6 +21,8 @@ model User {
 model Room {
   roomId    String       @id @default(uuid())
   name      String       @unique
+  created_by User       @relation(fields: [user_id], references: [userId])
+  user_id   String
   members   RoomMember[]
   messages  Message[]
   createdAt DateTime     @default(now())

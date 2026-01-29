@@ -16,7 +16,6 @@ async function Authentication_token_function(req,res,next){
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) 
-    console.log("Decoded token in middleware: ", JWT_SECRET);
 
     if (!decoded.user_id) {
       return res.status(401).json({ message: "Invalid token" });

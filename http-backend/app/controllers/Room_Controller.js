@@ -3,9 +3,9 @@ import { CreateRoomService , DeleteRoomService } from "../services/Room_Service.
 export const CreateRoomController = async(req,res)=>{
     try{
 
-        const {room_name} = req.body;
+        const {name} = req.body;
         const user_id = req.user_id;    
-        await CreateRoomService(room_name , user_id);
+        await CreateRoomService(name , user_id);
 
         return res.status(200).json({
             message : "Room Created Successfully"
@@ -29,9 +29,9 @@ export const CreateRoomController = async(req,res)=>{
 export const DeleteRoomController = async(req,res)=>{
     try{            
 
-        const {room_name} = req.body;
+        const {name} = req.body;
         const user_id = req.user_id;    
-        await DeleteRoomService(room_name , user_id); 
+        await DeleteRoomService(name , user_id); 
 
         return res.status(200).json({
             message : "Room Deleted Successfully"
