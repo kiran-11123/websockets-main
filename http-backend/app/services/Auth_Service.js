@@ -41,10 +41,8 @@ export const SigninService = async (email, password) => {
 }
 
 export const SignUpService = async (email, username, password) => {
-  console.log("signup service")
 
   try {
-    console.log(email, username, password)
 
     const find_user = await prisma.user.findUnique({
       where: {
@@ -52,7 +50,6 @@ export const SignUpService = async (email, username, password) => {
       },
     })
 
-    console.log("find_user", find_user)
 
     if (find_user) {
       throw new Error("Email Already registred...")

@@ -1,19 +1,30 @@
 {
   "name": "web_sockets_main",
   "version": "1.0.0",
+  "main": "database.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec \"node -r ts-node/register index.js\""
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kiran-11123/websockets-main.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kiran-11123/websockets-main/issues"
+  },
+  "homepage": "https://github.com/kiran-11123/websockets-main#readme",
+  "description": "",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@prisma/client": "^7.3.0",
-    "dotenv": "^17.2.3",
-    "pg": "^8.17.2"
-  },
-  "devDependencies": {
-    "prisma": "^7.3.0",
-    "nodemon": "^3.1.11",
-    "@types/node": "^25.1.0",
-    "@types/pg": "^8.16.0"
+    "@prisma/client": "^4.16.2",
+    "pg": "^8.17.2",
+    "prisma": "^4.16.2"
   }
 }
