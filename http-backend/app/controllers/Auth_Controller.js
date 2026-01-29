@@ -1,4 +1,5 @@
-import { SignUpService , SigninService } from "../services/Auth_Service.js";
+import prisma from "../../../database.js";
+import { SignUpService , SigninService ,deleteUserService } from "../services/Auth_Service.js";
 
 export const SigninController = async(req,res)=>{
      try{
@@ -74,5 +75,38 @@ export const SignUpController = async(req,res)=>{
             error:er
         })
          
+    }
+}
+
+
+export const deleteUserController = async(req,res)=>{
+      
+    try{
+
+        const user_id = req.user.user_id;
+
+        const result = await deleteUserService(user_id);
+
+        return res.status(200).json({
+            message : "User deleted successfully."
+        })
+
+    }
+    catch(er){
+        if(er.message === 'User not found'){
+            return res.status(400).json({
+                message : "User not found"
+            })
+        }
+        else if(er.message ==='Cannot delete user: they are admin of room'){
+            return res.status(400).json({
+                message : "Cannot delete user: they are admin of room"
+            })
+        }
+
+        return res.status(500).json({
+            message : "Internal Server Error",
+            error:er
+        })
     }
 }

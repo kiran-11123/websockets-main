@@ -101,3 +101,58 @@ export const DeleteRoomService = async(room_name , user_id)=>{
 
 
 }
+
+
+//exit user from room
+
+
+export const exitingRoomService = async(room_name , user_id)=>{
+       
+    try{
+
+       const find_room = await prisma.room.findUnique({
+            where:{
+                name  : room_name
+            }
+        })
+
+
+        if(!find_room){
+            throw new Error("Room Not found")
+        }
+
+        const check_admin = await prisma.roomMember.findUnique({
+
+            where :{
+               userId_roomId :{ 
+                userId : user_id,
+                roomId : find_room.roomId
+
+               }
+            }
+        })
+
+        if(!check_admin){
+             throw new Error("You are not found in this room")
+        }
+
+        if(check_admin.role === 'admin'){
+            throw new Error("You cannot exit from the room since you are the admin")
+        }
+
+        await prisma.roomMember.delete({
+             where :{
+                 userId_roomId :{ 
+                userId : user_id,
+                roomId : find_room.roomId
+
+               }
+             }
+        })
+
+    }
+    catch(er){
+        console.log(er);
+        throw er;
+    }
+}
