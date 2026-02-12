@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
 import cookie from 'cookie'
 import checkUser from "./utils/auth_token";
-
+import PubSubObject from "./PubSubManager";
 const PORT : any = process.env.websockets_port || 8080;
 
 
@@ -77,10 +77,6 @@ const user_id = token_data.user_id;
        const roomName = parsedData.roomId;
      const message = parsedData.message;
 
-  console.log("message received:", message);
-  console.log("room name:", roomName);
-
-  console.log("all users data:", all_user_data);    
 
   const sender = all_user_data.find((u:any) => u.ws === ws);
 if (!sender) return; 
