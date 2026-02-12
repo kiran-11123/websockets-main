@@ -108,6 +108,10 @@ export const deleteUserService = async(user_id)=>{
       // Optionally: block if admin
       if (m.role === "admin") {
         const result = await DeleteRoomService(m.room.name, user_id);
+
+        if(!result){
+            throw new Error('Cannot delete user: they are admin of room')
+        }
       }
       else{
 
