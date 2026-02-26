@@ -4,8 +4,19 @@ dotenv.config({ path: "../.env" });
 import cookie from 'cookie'
 import checkUser from "./utils/auth_token";
 import PubSubObject from "./PubSubManager";
+
+
 const PORT : any = process.env.websockets_port || 8080;
 
+
+interface userData{
+     
+  user: string;
+
+  rooms : string[];
+  username : string;
+    ws : any;
+}
 
 
 
@@ -15,9 +26,9 @@ const wss = new WebSocketServer({ port: PORT }, () => {
 });
 
 
-const all_user_data :any = []; // Array to store all user data including their WebSocket connections
+const all_user_data :userData[] = []; // Array to store all user data including their WebSocket connections
 
-wss.on("connection", (ws , request) => {
+wss.on("connection", (ws  , request) => {
     console.log("New client connected")
 
     const cookies = cookie.parse(request.headers.cookie || "");
@@ -52,6 +63,8 @@ const user_id = token_data.user_id;
     ws,
   });
 
+  
+
      ws.on('message', (data:any) => {
 
         let parsedData;
@@ -62,8 +75,23 @@ const user_id = token_data.user_id;
             console.error('Error handling message:', err);
         }
 
+       
          
-        if (parsedData.type === 'join_room') {
+        if(parsedData.type ==="create_room"){
+             const user = all_user_data.find((u:any) => u.ws === ws);
+
+             if(!user) return ;
+
+             if(!user.rooms.includes(parsedData.roomId)){
+                   user.rooms.push(parsedData.roomId);
+
+             }
+             else{
+                console.log("User already in the room");
+             }
+        }
+         
+        else if (parsedData.type === 'join_room') {
             const user = all_user_data.find((u:any) => u.ws === ws);
             if (!user) return;
 
