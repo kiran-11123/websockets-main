@@ -1,1 +1,1 @@
-{"root":["./src/pubsubmanager.ts","./src/index.ts","./src/redis/redis.ts","./src/utils/auth_token.ts"],"version":"5.9.3"}
+{"root":["./src/pubsubmanager.ts","./src/database_prisma.ts","./src/index.ts","./src/db_queries/room_insert.ts","./src/redis/redis.ts","./src/utils/auth_token.ts"],"version":"5.9.3"}
