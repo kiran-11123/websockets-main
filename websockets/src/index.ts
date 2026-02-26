@@ -15,7 +15,7 @@ interface userData{
 
   rooms : string[];
   username : string;
-    ws : any;
+  ws : any;
 }
 
 
@@ -63,7 +63,7 @@ const user_id = token_data.user_id;
     ws,
   });
 
-  
+
 
      ws.on('message', (data:any) => {
 
