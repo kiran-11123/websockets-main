@@ -1,128 +1,140 @@
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import dotenv from "dotenv";
 dotenv.config({ path: "../.env" });
-import cookie from 'cookie'
+import cookie from "cookie";
 import checkUser from "./utils/auth_token";
-import PubSubObject from "./PubSubManager";
 
+const PORT: number = Number(process.env.websockets_port) || 8080;
 
-const PORT : any = process.env.websockets_port || 8080;
-
-
-interface userData{
-     
-  user: string;
-
-  rooms : string[];
-  username : string;
-  ws : any;
+// Type for rooms
+interface RoomsDetails {
+  [roomId: string]: Set<WebSocket>;
 }
 
-
-
-
 const wss = new WebSocketServer({ port: PORT }, () => {
-    console.log(`WebSocket server running on ws://localhost:${PORT}`);
+  console.log(`WebSocket server running on ws://localhost:${PORT}`);
 });
 
+const room_details: RoomsDetails = {};
 
-const all_user_data :userData[] = []; // Array to store all user data including their WebSocket connections
+// Type for incoming messages
+interface IncomingMessage {
+  type: "create_room" | "join_room" | "chat";
+  roomId?: string;
+  message?: string;
+}
 
-wss.on("connection", (ws  , request) => {
-    console.log("New client connected")
+wss.on("connection", (ws, request) => {
+  console.log("New client connected");
 
-    const cookies = cookie.parse(request.headers.cookie || "");
+  // Parse token from cookies
+  const cookies = cookie.parse(request.headers.cookie || "");
+  const token = cookies.token;
 
-    const token = cookies.token;
-
-
-if (!token) {
+  if (!token) {
     ws.close(1008, "Unauthorized");
     console.log("No token found, connection closed.");
     return;
-}
+  }
 
-const token_data = checkUser(token);
+  const token_data = checkUser(token);
 
-console.log(token_data);
-
-if(token_data === null){
-      ws.close(1008, "Unauthorized");
-    console.log("No token found, connection closed.");
+  if (!token_data) {
+    ws.close(1008, "Unauthorized");
+    console.log("Invalid token, connection closed.");
     return;
-}
-    
+  }
 
-const username_decoded = token_data.username;
-const user_id = token_data.user_id;
+  const username_decoded = token_data.username;
+  const user_id = token_data.user_id;
 
-  all_user_data.push({
-    user: user_id,
-    username : username_decoded,
-    rooms: [],
-    ws,
+  ws.on("message", (data: string | Buffer) => {
+    let parsedData: IncomingMessage;
+
+    try {
+      parsedData = JSON.parse(data.toString());
+      console.log("Received message:", parsedData);
+    } catch (err) {
+      console.error("Error parsing message:", err);
+      return;
+    }
+
+    const roomId = parsedData.roomId;
+
+    switch (parsedData.type) {
+      case "create_room":
+        if (!roomId) {
+          console.log("Room ID is required to create a room");
+          return;
+        }
+        if (room_details[roomId]) {
+          console.log("Room already exists");
+          return;
+        }
+
+        room_details[roomId] = new Set();
+        room_details[roomId].add(ws);
+
+        console.log(`Room ${roomId} created and user ${username_decoded} added`);
+        break;
+
+      case "join_room":
+        if (!roomId) {
+          console.log("Room ID is required to join a room");
+          return;
+        }
+        const roomToJoin = room_details[roomId];
+        if (!roomToJoin) {
+          console.log(`Room ${roomId} not found`);
+          return;
+        }
+
+        if (roomToJoin.has(ws)) {
+          console.log(`User already in room ${roomId}`);
+        } else {
+          roomToJoin.add(ws);
+          console.log(`User ${username_decoded} joined room ${roomId}`);
+        }
+        break;
+
+      case "chat":
+        const message = parsedData.message;
+        if (!roomId) {
+          console.log("Room ID is empty");
+          return;
+        }
+        const roomToChat = room_details[roomId];
+        if (!roomToChat) {
+          console.log(`Room ${roomId} not found`);
+          return;
+        }
+        if (!roomToChat.has(ws)) {
+          console.log("Sender not in the room");
+          return;
+        }
+
+        // Broadcast to all other clients in the room
+        for (const client of roomToChat) {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            try {
+              client.send(JSON.stringify({ from: username_decoded, message }));
+            } catch (err) {
+              console.error("Failed to send message", err);
+            }
+          }
+        }
+        break;
+
+      default:
+        console.log("Unknown message type:", parsedData.type);
+    }
   });
 
-
-
-     ws.on('message', (data:any) => {
-
-        let parsedData;
-        try {
-            parsedData = JSON.parse(data);
-            console.log('Received message:', parsedData);
-        } catch (err) {
-            console.error('Error handling message:', err);
-        }
-
-       
-         
-        if(parsedData.type ==="create_room"){
-             const user = all_user_data.find((u:any) => u.ws === ws);
-
-             if(!user) return ;
-
-             if(!user.rooms.includes(parsedData.roomId)){
-                   user.rooms.push(parsedData.roomId);
-
-             }
-             else{
-                console.log("User already in the room");
-             }
-        }
-         
-        else if (parsedData.type === 'join_room') {
-            const user = all_user_data.find((u:any) => u.ws === ws);
-            if (!user) return;
-
-            if (!user.rooms.includes(parsedData.roomId)) {
-                user.rooms.push(parsedData.roomId);
-            }
-        }
-
-
-        else if (parsedData.type === "chat") {
-       const roomName = parsedData.roomId;
-     const message = parsedData.message;
-
-
-  const sender = all_user_data.find((u:any) => u.ws === ws);
-if (!sender) return; 
-    
-all_user_data.forEach((user:any) => {
-  if (user.rooms.includes(roomName) && user.ws !== sender.ws) {
-    console.log("message sent to", user.username);
-    user.ws.send(JSON.stringify({
-      from: sender.username,
-      room: roomName,
-      message,
-    }));
-  }
-});
-
- 
-}
-
-    });
-
+  // Remove user from all rooms on disconnect
+  ws.on("close", () => {
+    console.log(`Client disconnected: ${username_decoded}`);
+    for (const room of Object.values(room_details)) {
+      room.delete(ws);
+    }
+  });
 });
